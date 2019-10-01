@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<title>L2 - Hello Three.js</title>
+		<style>
+		body {
+			font-family: Monospace;
+			background-color: #f0f0f0;
+			margin: 0px;
+			overflow: hidden;
+		}
+		canvas {
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+		<script src="libs/three.js"></script>
+		<script src="libs/stats.min.js"></script>
+	</head>
+	<body>
+
+		<script>
+			var scene, renderer, camera, stats, cube;
+			
+			function Start() {
+			
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+				
+				var geometry = new THREE.BoxGeometry(1,1,1);
+				var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+				box = new THREE.Mesh( geometry, material );
+				scene.add( box );
+				
+				camera.position.z = 5;
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				document.body.appendChild( stats.domElement );
+				
+			}
+			
+			function Update() {
+				
+				requestAnimationFrame(Update);
+				stats.update();
+				renderer.render(scene, camera);
+			}
+
+			Start();
+			Update();
+			
+		</script>
+	</body>
+</html>
