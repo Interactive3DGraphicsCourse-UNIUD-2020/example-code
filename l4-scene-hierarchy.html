@@ -1,7 +1,7 @@
 <html>
 
 <head>
-	<title>Draw a triangle</title>
+	<title>Scene Hierarchy</title>
 	<style>
 		body {
 			font-family: Monospace;
@@ -22,34 +22,33 @@
 <body>
 
 	<script>
-		var scene, renderer, camera, stats;
+		var scene, camera, renderer;
 
 		function Start() {
 
 			scene = new THREE.Scene();
 			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.setClearColor(0xf0f0f0);
 			document.body.appendChild(renderer.domElement);
 
-			var geometry = new THREE.Geometry();
+			var pivot = new THREE.Object3D();
+			scene.add(pivot);
+			pivot.rotation.z = 45 * Math.PI / 180;
 
-				geometry.vertices.push(new THREE.Vector3(0, 0, 0),  
-				
-				new THREE.Vector3(2, 0, 0),
-				new THREE.Vector3(0, 2, 0));
-			geometry.faces.push(new THREE.Face3(0, 1, 2));
-
-			var material = new THREE.MeshBasicMaterial({
-				color: 0xff0000,
-				side: THREE.DoubleSide
+			// cylinder
+			var cylinder_geometry = new THREE.CylinderGeometry(0.3, 0.3, 3);
+			var cylinder_material = new THREE.MeshBasicMaterial({
+				color: 0xff0000
 			});
+			var cylinder = new THREE.Mesh(cylinder_geometry, cylinder_material);
 
-			triangle = new THREE.Mesh(geometry, material);
+			pivot.add(cylinder);
+			cylinder.position.set(0, 2, 0);
 
-			scene.add(triangle);
+			pivot.rotation.z = 90 * Math.PI / 180;
+
 
 			stats = new Stats();
 			stats.domElement.style.position = 'absolute';
@@ -61,8 +60,11 @@
 		}
 
 		function Update() {
+
 			requestAnimationFrame(Update);
+
 			stats.update();
+
 			renderer.render(scene, camera);
 		}
 

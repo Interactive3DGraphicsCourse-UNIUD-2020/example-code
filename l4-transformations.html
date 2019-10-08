@@ -19,7 +19,7 @@
 	<body>
 
 		<script>
-			var scene, renderer, camera, stats, cube;
+			var scene, renderer, camera, stats, box;
 			
 			function Start() {
 			
@@ -30,9 +30,11 @@
 				document.body.appendChild( renderer.domElement );
 				
 				var geometry = new THREE.BoxGeometry(1,1,1);
-				var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-				cube = new THREE.Mesh( geometry, material );
-				scene.add( cube );
+				var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
+				box = new THREE.Mesh( geometry, material );
+				
+				
+				scene.add( box );
 				
 				camera.position.z = 5;
 
@@ -44,9 +46,7 @@
 			}
 			
 			function Update() {
-				
 				requestAnimationFrame(Update);
-				cube.rotation.y += 0.03;
 				stats.update();
 				renderer.render(scene, camera);
 			}
