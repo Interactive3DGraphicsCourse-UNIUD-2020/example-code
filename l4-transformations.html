@@ -32,9 +32,10 @@
 				var geometry = new THREE.BoxGeometry(1,1,1);
 				var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
 				box = new THREE.Mesh( geometry, material );
-				
-				
 				scene.add( box );
+				box.scale.set(1,3,1);
+				
+				
 				
 				camera.position.z = 5;
 

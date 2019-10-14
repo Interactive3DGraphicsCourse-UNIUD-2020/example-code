@@ -46,14 +46,14 @@
 			var cylinder_geometry = new THREE.CylinderGeometry(0.3, 0.3, 3);
 			var cylinder_material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
 			cylinder = new THREE.Mesh( cylinder_geometry, cylinder_material );
-			cylinder.position.set( 0, 2 ,0);
+			
 			scene.add(cylinder);
 
 
 /////////////// your code goes here
 
-			
-			
+			cylinder.rotation.z = 90 * Math.PI / 180;
+			cylinder.position.set( 0, 2 ,0);
 
 
 			stats = new Stats();
