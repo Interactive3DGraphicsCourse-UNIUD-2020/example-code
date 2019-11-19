@@ -1,0 +1,94 @@
+<html>
+	<head>
+		<title>Make a flower</title>
+		<style>
+
+		body {
+			font-family: Monospace;
+			background-color: #f0f0f0;
+			margin: 0px;
+			overflow: hidden;
+		}
+
+		canvas {
+			width: 100%;
+			height: 100%;
+		}
+
+	</style>
+		<script src="libs/three.min.js"></script>
+		<script src="libs/stats.min.js"></script>
+	</head>
+	<body>
+
+		<script>
+
+			var scene, camera, renderer;
+
+			function Start() {
+
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setClearColor( 0xf0f0f0 );
+			document.body.appendChild( renderer.domElement );
+
+			// scene code here
+
+			var stem_geometry, stem_material, stem;
+			stem_geometry = new THREE.CylinderGeometry( 0.2, 0.2, 3);
+			stem_material = new THREE.MeshBasicMaterial( { color: 0x5a4416} );
+			stem = new THREE.Mesh( stem_geometry, stem_material );
+			scene.add( stem );
+
+			var stamen_geometry, stamen_material, stamen;
+			stamen_geometry = new THREE.SphereGeometry( 0.5 );
+			stamen_material = new THREE.MeshBasicMaterial( { color: 0x5a4416} );
+			stamen = new THREE.Mesh( stamen_geometry, stamen_material );
+			stamen.position.y = 1.5;
+			stem.add( stamen );
+
+			var petal_geometry, petal_material, petal;
+			petal_geometry = new THREE.CylinderGeometry( 0.2, 0, 2);
+			petal_material = new THREE.MeshBasicMaterial( { color: 0xca5e32} );
+
+			for( var i=0; i<24; i++)
+			{
+				var petal = new THREE.Mesh( petal_geometry, petal_material );
+				petal.position.y = 1;
+				var petal_base = new THREE.Object3D();
+				stamen.add( petal_base );
+				petal_base.rotation.z = (360/24 * Math.PI/180) * i;
+				petal_base.add( petal );
+
+			}
+
+			stamen.rotation.x = 90 * Math.PI/180;
+
+			stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			camera.position.z = 10;
+			camera.position.y = 3;
+
+			}
+
+			function Render() {
+
+				requestAnimationFrame(Render);
+
+				stats.update();
+
+				renderer.render(scene, camera);
+			}
+
+
+			Start()
+			Render();
+		</script>
+	</body>
+</html>

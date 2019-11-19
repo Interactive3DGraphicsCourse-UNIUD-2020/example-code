@@ -1,0 +1,79 @@
+<html>
+	<head>
+		<title>Texturing a quad</title>
+		<style>
+		body {
+			font-family: Monospace;
+			background-color: #f0f0f0;
+			margin: 0px;
+			overflow: hidden;
+		}
+
+		canvas {
+			width: 100%;
+			height: 100%;
+		}
+		</style>
+		<script src="libs/three.js"></script>
+		<script src="libs/stats.min.js"></script>
+	</head>
+	<body>
+
+		<script>
+
+			var scene, camera, renderer;
+
+			function Init() {
+
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setClearColor( 0xf0f0f0 );
+			document.body.appendChild( renderer.domElement );
+
+			var material, geometry, mesh;
+			var ourMap = new THREE.TextureLoader().load( 'textures/brick_brownGrooved_d_1k.png' );
+			ourMap.magFilter = THREE.LinearFilter;
+			var material = new THREE.MeshBasicMaterial( { map: ourMap } );
+			geometry = new THREE.Geometry();
+			geometry.vertices.push( new THREE.Vector3( -0.3, 0.3, 0 ));
+			geometry.vertices.push( new THREE.Vector3( -0.3, -0.3, 0 ));
+			geometry.vertices.push( new THREE.Vector3( 0.3, -0.3, 0 ));
+			geometry.vertices.push( new THREE.Vector3( 0.3, 0.3, 0 ));
+
+			var uvs=[];
+			uvs.push( new THREE.Vector2(0.0, 1));
+			uvs.push( new THREE.Vector2(0.0, 0.0));
+			uvs.push( new THREE.Vector2(1, 0.0));
+			uvs.push( new THREE.Vector2(1, 1));
+
+			geometry.faces.push( new THREE.Face3( 0, 1, 2));
+			geometry.faceVertexUvs[0].push( [ uvs[0], uvs[1], uvs[2] ] );
+			geometry.faces.push( new THREE.Face3( 0, 2, 3));
+			geometry.faceVertexUvs[0].push( [ uvs[0], uvs[2], uvs[3] ] );
+
+			mesh = new THREE.Mesh(geometry, material);
+			scene.add( mesh );
+
+			stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+			camera.position.z = 5;
+
+			}
+
+			function Render() {
+				requestAnimationFrame(Render);
+
+				stats.update();
+
+				renderer.render(scene, camera);
+			}
+
+			Init();
+			Render();
+		</script>
+	</body>
+</html>
