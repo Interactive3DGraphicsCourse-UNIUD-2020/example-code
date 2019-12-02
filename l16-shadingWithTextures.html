@@ -182,7 +182,7 @@
 						texture.minFilter = THREE.LinearMipMapLinearFilter;
 						texture.anisotropy = renderer.getMaxAnisotropy();
 						texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    			  texture.offset.set( 0, 0 );
+    			  		texture.offset.set( 0, 0 );
 						texture.needsUpdate = true;
 						render();
 					} )
@@ -274,9 +274,9 @@
 			function updateUniforms() {
 
 					uniforms.clight.value = new THREE.Vector3(
-							lightParameters.red * lightParameters.intensity,
-					    lightParameters.green * lightParameters.intensity,
-							lightParameters.blue * lightParameters.intensity);
+					lightParameters.red * lightParameters.intensity,
+					lightParameters.green * lightParameters.intensity,
+					lightParameters.blue * lightParameters.intensity);
 					uniforms.textureRepeat.value = new THREE.Vector2( textureParameters.repeatS, textureParameters.repeatT);
 					uniforms.diffuseMap.value = diffuseMap;
 					uniforms.specularMap.value = specularMap;
