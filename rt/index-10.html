@@ -1,0 +1,183 @@
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #canvas {
+            width: 100%;
+            height: 100%;
+        }
+        #description {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            width: 300px;
+        }
+        #info {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            padding-top: 0.8em;
+            padding-bottom: 0.8em;
+        }
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 0 0.8em;
+        }
+    </style>
+    <script src="../libs/three.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id=description class="overlay">
+        <p>
+            This is a JavaScript port of the path tracing algorithm
+            from Peter Shirley's 
+            <a target="_blank" href="https://www.amazon.com/Ray-Tracing-Weekend-Minibooks-Book-ebook/dp/B01B5AODD8/">
+                Ray Tracing in One Weekend</a>.
+        </p>
+        
+    </div>
+    <div id="info" class="overlay">
+            <div>
+                    Rendering pass: <span id="pass">1</span>
+                </div>
+                <div>
+                    Last pass render time: <span id="time">0</span>
+                </div>
+            <div>
+                Canvas resolution <span id="canvas-resolution"></span>
+            </div>
+            <div>
+                Window resolution <span id="window-resolution"></span>
+            </div>
+        </div>
+    <script type="module">
+        import { Ray } from './ray-1.js';
+        import { Camera } from './camera-1.js';
+        import { Sphere } from './sphere-8.js';
+        import { HitRecord} from './hitRecord-8.js';
+        import { Material, LambertianMaterial, MetalMaterial, DielectricMaterial} from './material-10.js';
+
+        const scaleFactor = 0.25;
+        const aspect = window.innerWidth / window.innerHeight;
+        const canvasWidth = Math.floor(window.innerWidth * scaleFactor );
+        const canvasHeight = Math.floor(window.innerHeight * scaleFactor );
+
+        const canvas = document.getElementById("canvas");
+        const context = canvas.getContext("2d");
+
+        const nx = canvas.width = canvasWidth;
+        const ny = canvas.height = canvasHeight;
+
+        const img = context.getImageData(0, 0, nx, ny);
+        const pixels = img.data;
+        const numPixels = pixels.length / 4;
+
+        const canvasResInfo = document.getElementById("canvas-resolution");
+        const windowResInfo = document.getElementById("window-resolution");
+        const passInfo = document.getElementById("pass");
+        const timeInfo = document.getElementById("time");
+        canvasResInfo.innerText = canvas.width + "x" + canvas.height;
+        windowResInfo.innerText = window.innerWidth + "x" + window.innerHeight;
+
+        const spheres = [];
+
+        spheres.push( new Sphere( new THREE.Vector3(0,0,-1), 0.5, new LambertianMaterial( new THREE.Color(0.8,0.3,0.3))) );
+        spheres.push( new Sphere( new THREE.Vector3(0,-100.5,-1), 100, new LambertianMaterial( new THREE.Color(0.8,0.8,0))) );
+        spheres.push( new Sphere( new THREE.Vector3(1,0,-1), 0.5, new MetalMaterial( new THREE.Color(0.8,0.6,0.2),0.3)) );
+        spheres.push( new Sphere( new THREE.Vector3(-1,0,-1), 0.5, new DielectricMaterial( 1.5) ));
+        spheres.push( new Sphere( new THREE.Vector3(-1,0,-1), -0.45, new DielectricMaterial( 1.5) ));
+
+        const camera = new Camera( 90*Math.PI/180, aspect );
+
+        function hit(r, tmin, tmax, hitRecord) {
+            var hitSomething = false;
+            var closestT = tmax;
+            for (var i = 0, len = spheres.length; i < len; i++) {
+                const tempHitRecord = new HitRecord();
+                if (spheres[i].hit(r, tmin, closestT, tempHitRecord) > 0.0) {
+                    if (tempHitRecord.t < closestT) {
+                        hitRecord.t = tempHitRecord.t;
+                        hitRecord.p = tempHitRecord.p;
+                        hitRecord.n = tempHitRecord.n;
+                        hitRecord.material = tempHitRecord.material;
+                        closestT = hitRecord.t;
+                        hitSomething = true;
+                    }
+                }
+            }
+
+            return hitSomething;
+        }
+
+        
+
+        function color( r, depth ) {
+            let hitRecord = new HitRecord();
+            if ( hit(r, 0.0001, Number.MAX_VALUE, hitRecord)) {
+                let scattered = new Ray( new THREE.Vector3(), new THREE.Vector3());
+                let attenuation = new THREE.Color();
+                if (depth < 50 && hitRecord.material.scatter(r, attenuation, hitRecord, scattered ) ) {
+                    //console.log(attenuation);
+                    return color( scattered, depth + 1).multiply(attenuation);
+                } else {
+                    return new THREE.Color(0,0,0);
+                }
+            }
+            else {
+                r.dir.normalize();
+                const t = 0.5 * (r.dir.y + 1);
+                return new THREE.Color(1.0, 1.0, 1.0).lerp( new THREE.Color(0.5, 0.7, 1.0),t);
+            }
+        }
+
+        let k=1;
+        
+        const accumulator = new Float32Array(numPixels * 3);
+        
+        setTimeout(function render() {
+            setTimeout(render);
+
+            var startTime = Date.now();
+            for (let j = 0; j < ny; j++) {
+                for (let  i = 0; i < nx; i++) {
+
+                
+                    let u = (i + Math.random()) / nx;
+                    let v = (j + Math.random()) / ny;
+
+                    const r = camera.getRay( u, v);
+
+                    const col = color(r,0);
+
+                    const index = ((ny - j - 1) * nx + i) * 3;
+
+                    accumulator[index    ] += col.r;
+                    accumulator[index + 1] += col.g;
+                    accumulator[index + 2] += col.b;
+                }
+            }
+
+            for (var p = 0; p < numPixels; p++) {
+                var pi = p * 4;
+                var ai = p * 3;
+
+                pixels[pi    ] = Math.floor(Math.sqrt(accumulator[ai] / k) * 255.99);
+                pixels[pi + 1] = Math.floor(Math.sqrt(accumulator[ai + 1] / k) * 255.99);
+                pixels[pi + 2] = Math.floor(Math.sqrt(accumulator[ai + 2] / k) * 255.99);
+                pixels[pi + 3] = 255;
+            }
+
+            context.putImageData(img, 0, 0);
+            passInfo.innerText = ++k;
+            timeInfo.innerText = ((Date.now() - startTime) / 1000).toPrecision(2) + "s";
+        });
+                
+    </script>
+    
+   
+</body>
+</html>
